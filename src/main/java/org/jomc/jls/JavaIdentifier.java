@@ -65,7 +65,7 @@ public final class JavaIdentifier implements CharSequence, Serializable
      * @version $JOMC$
      * @see JavaIdentifier#normalize(java.lang.String, org.jomc.jls.JavaIdentifier.NormalizationMode)
      */
-    public static enum NormalizationMode
+    public enum NormalizationMode
     {
 
         /**
@@ -393,7 +393,8 @@ public final class JavaIdentifier implements CharSequence, Serializable
                             else if ( last_codepoint > -1 && j < s0
                                           && isCamelCase( last_codepoint, text.codePointAt( i ),
                                                           text.codePointAt( j ) ) )
-                            { // Retain camel-case in words.
+                            {
+                                // Retain camel-case in words.
                                 identifierBuilder.append( text.charAt( i ) );
                                 retainedIndices.add( identifierBuilder.length() - 1 );
                             }
@@ -434,7 +435,8 @@ public final class JavaIdentifier implements CharSequence, Serializable
                             else if ( last_codepoint > -1 && j < s0
                                           && isCamelCase( last_codepoint, text.codePointAt( i ),
                                                           text.codePointAt( j ) ) )
-                            { // Retain camel-case in words.
+                            {
+                                // Retain camel-case in words.
                                 identifierBuilder.append( text.charAt( i ) );
                                 retainedIndices.add( identifierBuilder.length() - 1 );
                             }

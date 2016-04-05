@@ -835,7 +835,7 @@ public final class JavaTypeName implements Serializable
         }
     }
 
-    private static JavaTypeName parse( final String text, boolean runtimeException ) throws ParseException
+    private static JavaTypeName parse( final String text, final boolean runtimeException ) throws ParseException
     {
         Map<String, JavaTypeName> map = cache == null ? null : cache.get();
 
