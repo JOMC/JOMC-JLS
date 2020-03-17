@@ -470,7 +470,7 @@ public final class JavaTypeName implements Serializable
     {
         if ( this.arguments == null )
         {
-            this.arguments = new ArrayList<Argument>();
+            this.arguments = new ArrayList<>();
         }
 
         return this.arguments;
@@ -841,8 +841,8 @@ public final class JavaTypeName implements Serializable
 
         if ( map == null )
         {
-            map = new HashMap<String, JavaTypeName>( 128 );
-            cache = new SoftReference<Map<String, JavaTypeName>>( map );
+            map = new HashMap<>( 128 );
+            cache = new SoftReference<>( map );
         }
 
         synchronized ( map )
@@ -1466,7 +1466,7 @@ public final class JavaTypeName implements Serializable
     private static final class Token
     {
 
-        private int kind;
+        private final int kind;
 
         private final int position;
 
@@ -1568,7 +1568,7 @@ public final class JavaTypeName implements Serializable
         private static List<Token> tokenize( final String input, final boolean runtimeException )
             throws ParseException
         {
-            final List<Token> list = new LinkedList<Token>();
+            final List<Token> list = new LinkedList<>();
             final ParsePosition pos = new ParsePosition( 0 );
 
             for ( Token t = nextToken( pos, input, runtimeException );

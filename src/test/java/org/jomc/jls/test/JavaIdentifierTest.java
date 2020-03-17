@@ -100,14 +100,15 @@ public class JavaIdentifierTest
         assertInvalidJavaIdentifier( "@" );
         assertInvalidJavaIdentifier( "   " );
 
-        for ( final String keyword : JavaLanguage.KEYWORDS )
+        JavaLanguage.KEYWORDS.stream().forEach( ( keyword )  ->
         {
             assertInvalidJavaIdentifier( keyword );
-        }
-        for ( final String literal : JavaLanguage.BOOLEAN_LITERALS )
+        } );
+
+        JavaLanguage.BOOLEAN_LITERALS.stream().forEach( ( literal )  ->
         {
             assertInvalidJavaIdentifier( literal );
-        }
+        } );
 
         assertInvalidJavaIdentifier( JavaLanguage.NULL_LITERAL );
     }

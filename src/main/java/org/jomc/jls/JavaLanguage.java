@@ -179,15 +179,7 @@ class JavaLanguage
      */
     static boolean isKeyword( final String s )
     {
-        for ( final String keyword : KEYWORDS )
-        {
-            if ( keyword.equalsIgnoreCase( s ) )
-            {
-                return true;
-            }
-        }
-
-        return false;
+        return KEYWORDS.parallelStream().anyMatch( ( keyword )  -> ( keyword.equalsIgnoreCase( s ) ) );
     }
 
     /**
@@ -199,15 +191,7 @@ class JavaLanguage
      */
     static boolean isBooleanLiteral( final String s )
     {
-        for ( final String literal : BOOLEAN_LITERALS )
-        {
-            if ( literal.equalsIgnoreCase( s ) )
-            {
-                return true;
-            }
-        }
-
-        return false;
+        return BOOLEAN_LITERALS.parallelStream().anyMatch( ( literal )  -> ( literal.equalsIgnoreCase( s ) ) );
     }
 
     /**

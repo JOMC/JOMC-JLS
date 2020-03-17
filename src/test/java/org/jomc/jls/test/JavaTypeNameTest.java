@@ -93,10 +93,10 @@ public class JavaTypeNameTest
     @Test
     public final void ParsesBasicTypeNames() throws Exception
     {
-        for ( final String basicType : JavaLanguage.BASIC_TYPES )
+        JavaLanguage.BASIC_TYPES.forEach( ( basicType )  ->
         {
             assertBasicTypeName( basicType );
-        }
+        } );
     }
 
     @Test
@@ -289,66 +289,66 @@ public class JavaTypeNameTest
     @Test
     public final void ParsesBasicArrayTypeNames() throws Exception
     {
-        for ( final String basicType : JavaLanguage.BASIC_TYPES )
+        JavaLanguage.BASIC_TYPES.stream().forEach( ( basicType )  ->
         {
             assertBasicArrayTypeName( basicType + "[]" );
             assertBasicArrayTypeName( basicType + "[][]" );
             assertBasicArrayTypeName( basicType + "[][][]" );
-        }
+        } );
     }
 
     @Test
     public final void DetectsInvalidQualifiedBasicTypeNames() throws Exception
     {
-        for ( final String basicType : JavaLanguage.BASIC_TYPES )
+        JavaLanguage.BASIC_TYPES.stream().forEach( ( basicType )  ->
         {
             assertInvalidTypeName( "validpackagename." + basicType );
-        }
+        } );
     }
 
     @Test
     public final void DetectsInvalidQualifiedBasicArrayTypeNames() throws Exception
     {
-        for ( final String basicType : JavaLanguage.BASIC_TYPES )
+        JavaLanguage.BASIC_TYPES.stream().forEach( ( basicType )  ->
         {
             assertInvalidTypeName( "validpackagename." + basicType + "[]" );
             assertInvalidTypeName( "validpackagename." + basicType + "[][]" );
             assertInvalidTypeName( "validpackagename." + basicType + "[][][]" );
-        }
+        } );
     }
 
     @Test
     public final void DetectsInvalidBasicTypeNamesWithReferenceTypeArgument() throws Exception
     {
-        for ( final String basicType : JavaLanguage.BASIC_TYPES )
+        JavaLanguage.BASIC_TYPES.stream().forEach( ( basicType )  ->
         {
             assertInvalidTypeName( basicType + "<Test>" );
-        }
+        } );
     }
 
     @Test
     public final void DetectsInvalidBasicTypeNamesWithWildcardTypeArgument() throws Exception
     {
-        for ( final String basicType : JavaLanguage.BASIC_TYPES )
+        JavaLanguage.BASIC_TYPES.stream().forEach( ( basicType )  ->
         {
             assertInvalidTypeName( basicType + "<?>" );
-        }
+        } );
     }
 
     @Test
     public final void DetectsInvalidBasicTypeNamesWithBoundedWildcardTypeArgument() throws Exception
     {
-        for ( final String basicType : JavaLanguage.BASIC_TYPES )
+        JavaLanguage.BASIC_TYPES.stream().forEach( ( basicType )  ->
         {
             assertInvalidTypeName( basicType + "<? extends Test>" );
             assertInvalidTypeName( basicType + "<? super Test>" );
-        }
+        } );
     }
 
     @Test
     public final void DetectsInvalidKeywordOrBooleanLiteralOrNullLiteralIdentifiers() throws Exception
     {
-        for ( final String keyword : JavaLanguage.KEYWORDS )
+        JavaLanguage.KEYWORDS.stream().forEach( ( keyword )  ->
         {
             if ( !JavaLanguage.BASIC_TYPES.contains( keyword ) )
             {
@@ -365,9 +365,9 @@ public class JavaTypeNameTest
             assertInvalidTypeName( "validpackagename.Test<Test, ? super " + keyword + ">" );
             assertInvalidTypeName( "validpackagename.Test<?, Test, ? extends " + keyword + ">" );
             assertInvalidTypeName( "validpackagename.Test<?, Test, ? super " + keyword + ">" );
-        }
+        } );
 
-        for ( final String literal : JavaLanguage.BOOLEAN_LITERALS )
+        JavaLanguage.BOOLEAN_LITERALS.stream().forEach( ( literal )  ->
         {
             assertInvalidTypeName( literal );
             assertInvalidTypeName( "validpackagename." + literal );
@@ -380,7 +380,7 @@ public class JavaTypeNameTest
             assertInvalidTypeName( "validpackagename.Test<Test, ? super " + literal + ">" );
             assertInvalidTypeName( "validpackagename.Test<?, Test, ? extends " + literal + ">" );
             assertInvalidTypeName( "validpackagename.Test<?, Test, ? super " + literal + ">" );
-        }
+        } );
 
         assertInvalidTypeName( JavaLanguage.NULL_LITERAL );
         assertInvalidTypeName( "validpackagename." + JavaLanguage.NULL_LITERAL );
@@ -442,7 +442,7 @@ public class JavaTypeNameTest
         assertInvalidTypeName( "TEST<TEST<." );
         assertInvalidTypeName( "TEST<TEST<?" );
 
-        for ( final String basicType : JavaLanguage.BASIC_TYPES )
+        JavaLanguage.BASIC_TYPES.stream().forEach( ( basicType )  ->
         {
             assertInvalidTypeName( "[" + basicType );
             assertInvalidTypeName( "]" + basicType );
@@ -451,15 +451,11 @@ public class JavaTypeNameTest
             assertInvalidTypeName( "," + basicType );
             assertInvalidTypeName( "." + basicType );
             assertInvalidTypeName( "?" + basicType );
-        }
-
-        for ( final String basicType : JavaLanguage.BASIC_TYPES )
-        {
             assertInvalidTypeName( basicType + "]" );
             assertInvalidTypeName( basicType + ">" );
             assertInvalidTypeName( basicType + "," );
             assertInvalidTypeName( basicType + "?" );
-        }
+        } );
     }
 
     @Test
@@ -487,10 +483,10 @@ public class JavaTypeNameTest
         assertInvalidTypeName( "TEST.TEST<?extends" );
         assertInvalidTypeName( "TEST.TEST<?super" );
 
-        for ( final String basicType : JavaLanguage.BASIC_TYPES )
+        JavaLanguage.BASIC_TYPES.stream().forEach( ( basicType )  ->
         {
             assertInvalidTypeName( basicType + "[" );
-        }
+        } );
     }
 
     @Test
@@ -498,10 +494,10 @@ public class JavaTypeNameTest
     {
         assertInvalidTypeName( "@" );
 
-        for ( final String basicType : JavaLanguage.BASIC_TYPES )
+        JavaLanguage.BASIC_TYPES.stream().forEach( ( basicType )  ->
         {
             assertInvalidTypeName( basicType + "@" );
-        }
+        } );
 
         assertInvalidTypeName( "ReferenceType@" );
         assertInvalidTypeName( "validpackagename.ReferenceType@" );
@@ -520,10 +516,10 @@ public class JavaTypeNameTest
     @Test
     public final void DetectsDuplicateTokens() throws Exception
     {
-        for ( final String basicType : JavaLanguage.BASIC_TYPES )
+        JavaLanguage.BASIC_TYPES.stream().forEach( ( basicType )  ->
         {
             assertInvalidTypeName( basicType + " " + basicType );
-        }
+        } );
 
         assertInvalidTypeName( "ReferenceType ReferenceType" );
         assertInvalidTypeName( "ReferenceType.." );

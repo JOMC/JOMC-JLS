@@ -149,6 +149,7 @@ public final class JavaIdentifier implements CharSequence, Serializable
      *
      * @return The number of {@code char}s in this sequence.
      */
+    @Override
     public int length()
     {
         return this.identifier.length();
@@ -163,6 +164,7 @@ public final class JavaIdentifier implements CharSequence, Serializable
      *
      * @throws IndexOutOfBoundsException if {@code index} is negative or not less than the length of the sequence.
      */
+    @Override
     public char charAt( final int index )
     {
         return this.identifier.charAt( index );
@@ -179,6 +181,7 @@ public final class JavaIdentifier implements CharSequence, Serializable
      * @throws IndexOutOfBoundsException if {@code start} or {@code end} are negative, if {@code end} is greater than
      * the length of the sequence, or if {@code start} is greater than {@code end}.
      */
+    @Override
     public CharSequence subSequence( final int start, final int end )
     {
         return this.identifier.subSequence( start, end );
@@ -316,8 +319,8 @@ public final class JavaIdentifier implements CharSequence, Serializable
 
         if ( map == null )
         {
-            map = new HashMap<CacheKey, JavaIdentifier>( 128 );
-            cache = new SoftReference<Map<CacheKey, JavaIdentifier>>( map );
+            map = new HashMap<>( 128 );
+            cache = new SoftReference<>( map );
         }
 
         synchronized ( map )
@@ -373,7 +376,7 @@ public final class JavaIdentifier implements CharSequence, Serializable
         }
 
         final StringBuilder identifierBuilder = new StringBuilder( text.length() );
-        final List<Integer> retainedIndices = new ArrayList<Integer>( text.length() );
+        final List<Integer> retainedIndices = new ArrayList<>( text.length() );
         boolean start_of_word = true;
         int words = 0;
 
