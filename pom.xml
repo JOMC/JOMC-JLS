@@ -44,7 +44,7 @@
     y is the Java Language Specification Java SE Edition version backing the classes (never decremented).
     z is a version incremented with every release (release counter starting with zero; never decremented).
   -->
-  <version>5.7.1-SNAPSHOT</version>
+  <version>5.7.0-SNAPSHOT</version>
   <name>JOMC ⁑ JLS</name>
   <description>Provides classes related to "The Java® Language Specification".</description>
   <url>${jomc.base.url}/${jomc.site.location}</url>
