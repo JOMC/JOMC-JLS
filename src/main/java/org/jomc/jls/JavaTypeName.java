@@ -1466,7 +1466,7 @@ public final class JavaTypeName implements Serializable
     private static final class Token
     {
 
-        private int kind;
+        private final int kind;
 
         private final int position;
 
