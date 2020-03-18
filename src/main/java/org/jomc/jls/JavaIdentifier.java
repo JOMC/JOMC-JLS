@@ -40,6 +40,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.ResourceBundle;
 
 /**
@@ -244,16 +245,7 @@ public final class JavaIdentifier implements CharSequence, Serializable
      */
     public static JavaIdentifier normalize( final String text, final NormalizationMode mode ) throws ParseException
     {
-        if ( text == null )
-        {
-            throw new NullPointerException( "text" );
-        }
-        if ( mode == null )
-        {
-            throw new NullPointerException( "mode" );
-        }
-
-        return parse( text, mode, false );
+        return parse( Objects.requireNonNull( text, "text" ), Objects.requireNonNull( mode, "mode" ), false );
     }
 
     /**
@@ -270,12 +262,7 @@ public final class JavaIdentifier implements CharSequence, Serializable
      */
     public static JavaIdentifier parse( final String text ) throws ParseException
     {
-        if ( text == null )
-        {
-            throw new NullPointerException( "text" );
-        }
-
-        return parse( text, null, false );
+        return parse( Objects.requireNonNull( text, "text" ), null, false );
     }
 
     /**
@@ -296,14 +283,9 @@ public final class JavaIdentifier implements CharSequence, Serializable
      */
     public static JavaIdentifier valueOf( final String text ) throws IllegalArgumentException
     {
-        if ( text == null )
-        {
-            throw new NullPointerException( "text" );
-        }
-
         try
         {
-            return parse( text, null, true );
+            return parse( Objects.requireNonNull( text, "text" ), null, true );
         }
         catch ( final ParseException e )
         {

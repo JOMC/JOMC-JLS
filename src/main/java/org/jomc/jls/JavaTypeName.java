@@ -43,6 +43,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.ResourceBundle;
 
 /**
@@ -794,12 +795,7 @@ public final class JavaTypeName implements Serializable
      */
     public static JavaTypeName parse( final String text ) throws ParseException
     {
-        if ( text == null )
-        {
-            throw new NullPointerException( "text" );
-        }
-
-        return parse( text, false );
+        return parse( Objects.requireNonNull( text, "text" ), false );
     }
 
     /**
@@ -820,14 +816,9 @@ public final class JavaTypeName implements Serializable
      */
     public static JavaTypeName valueOf( final String text ) throws IllegalArgumentException
     {
-        if ( text == null )
-        {
-            throw new NullPointerException( "text" );
-        }
-
         try
         {
-            return parse( text, true );
+            return parse( Objects.requireNonNull( text, "text" ), true );
         }
         catch ( final ParseException e )
         {
