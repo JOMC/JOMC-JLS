@@ -42,6 +42,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.ResourceBundle;
+import java.util.stream.Stream;
 
 /**
  * Data type of a Java identifier.
@@ -465,13 +466,13 @@ public final class JavaIdentifier implements CharSequence, Serializable
             }
         }
 
+        t.identifier = identifierBuilder.toString();
+
         if ( words > 0 )
         {
             // Multiple words - no camel-case retained in any word.
-            toLowerCase( identifierBuilder, retainedIndices );
+            t.identifier = toLowerCase( t.identifier, retainedIndices );
         }
-
-        t.identifier = identifierBuilder.toString();
 
         if ( t.identifier.length() <= 0 )
         {
@@ -485,9 +486,7 @@ public final class JavaIdentifier implements CharSequence, Serializable
             }
         }
 
-        if ( JavaLanguage.KEYWORDS.contains( t.identifier )
-                 || JavaLanguage.BOOLEAN_LITERALS.contains( t.identifier )
-                 || JavaLanguage.NULL_LITERAL.equals( t.identifier ) )
+        if ( JavaLanguage.isKeywordOrBooleanOrNullLiteral( t.identifier::equals ) )
         {
             if ( mode != null )
             {
@@ -520,14 +519,16 @@ public final class JavaIdentifier implements CharSequence, Serializable
         return Character.isLowerCase( left ) && Character.isUpperCase( middle ) && Character.isLowerCase( right );
     }
 
-    private static void toLowerCase( final StringBuilder stringBuilder, final List<Integer> indices )
+    private static String toLowerCase( final String string, final List<Integer> indices )
     {
-        for ( int i = 0, s0 = indices.size(); i < s0; i++ )
+        final char[] chars = string.toCharArray();
+
+        try ( final Stream<Integer> stream = indices.parallelStream() )
         {
-            final int index = indices.get( i );
-            final int cp = Character.toLowerCase( stringBuilder.codePointAt( index ) );
-            stringBuilder.replace( index, index + 1, String.valueOf( Character.toChars( cp ) ) );
+            stream.forEach( i  -> chars[i] = Character.toLowerCase( chars[i] ) );
         }
+
+        return String.valueOf( chars );
     }
 
     private static String getMessage( final String key, final Object... args )

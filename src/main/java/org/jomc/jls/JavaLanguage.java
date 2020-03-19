@@ -30,8 +30,11 @@
  */
 package org.jomc.jls;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 /**
  * Java language support.
@@ -63,7 +66,7 @@ class JavaLanguage
      *      double
      * </pre>
      */
-    static final Set<String> BASIC_TYPES = new HashSet<String>( 8 );
+    static final Set<String> BASIC_TYPES = new HashSet<>( 8 );
 
     /**
      * The Java Language Specification - Java SE 7 Edition - Chapter 3.10.3. Boolean Literals
@@ -72,7 +75,7 @@ class JavaLanguage
      *      true false
      * </pre>
      */
-    static final Set<String> BOOLEAN_LITERALS = new HashSet<String>( 2 );
+    static final Set<String> BOOLEAN_LITERALS = new HashSet<>( 2 );
 
     /**
      * The Java Language Specification - Java SE 7 Edition - Chapter 3.9. Keywords
@@ -90,7 +93,7 @@ class JavaLanguage
      *      const      float      native       super       while
      * </pre>
      */
-    static final Set<String> KEYWORDS = new HashSet<String>( 50 );
+    static final Set<String> KEYWORDS = new HashSet<>( 50 );
 
     /**
      * The Java Language Specification - Java SE 7 Edition - Chapter 3.10.7. The Null Literal
@@ -100,6 +103,8 @@ class JavaLanguage
      * </pre>
      */
     static final String NULL_LITERAL = "null";
+
+    private static final Set<String> KEYWORDS_AND_LITERALS = new HashSet<>( 50 );
 
     static
     {
@@ -168,43 +173,79 @@ class JavaLanguage
         KEYWORDS.add( "void" );
         KEYWORDS.add( "volatile" );
         KEYWORDS.add( "while" );
+
+        KEYWORDS_AND_LITERALS.addAll( KEYWORDS );
+        KEYWORDS_AND_LITERALS.addAll( BOOLEAN_LITERALS );
+        KEYWORDS_AND_LITERALS.add( NULL_LITERAL );
     }
 
     /**
-     * Tests whether a given string is case-insensitively equal to a Java keyword.
+     * Tests Java keywords.
      *
-     * @param s The string to test.
+     * @param predicate The predicate to evaluate (e.g. "Test"::equalsIgnoreCase).
      *
-     * @return {@code true}, if {@code s} is case-insensitively equal to a Java keyword; {@code false}, if not.
+     * @return {@code true}, if {@code predicate} evaluates to {@code true} for any Java keyword; {@code false}, if not.
      */
-    static boolean isKeyword( final String s )
+    static boolean isKeyword( final Predicate<? super String> predicate )
     {
-        return KEYWORDS.parallelStream().anyMatch( ( keyword )  -> ( keyword.equalsIgnoreCase( s ) ) );
+        return isToken( KEYWORDS, predicate );
     }
 
     /**
-     * Tests whether a given string is case-insensitively equal to a Java boolean literal.
+     * Tests Java boolean literals.
      *
-     * @param s The string to test.
+     * @param predicate The predicate to evaluate (e.g. "Test"::equalsIgnoreCase).
      *
-     * @return {@code true}, if {@code s} is case-insensitively equal to a Java boolean literal; {@code false}, if not.
+     * @return {@code true}, if {@code predicate} evaluates to {@code true} for any Java boolean literal;
+     * {@code false}, if not.
      */
-    static boolean isBooleanLiteral( final String s )
+    static boolean isBooleanLiteral( final Predicate<? super String> predicate )
     {
-        return BOOLEAN_LITERALS.parallelStream().anyMatch( ( literal )  -> ( literal.equalsIgnoreCase( s ) ) );
+        return isToken( BOOLEAN_LITERALS, predicate );
     }
 
     /**
-     * Tests whether a given string is case-insensitively equal to the Java {@code null} literal.
+     * Tests the Java {@code null} literal.
      *
-     * @param s The string to test.
+     * @param predicate The predicate to evaluate (e.g. "Test"::equalsIgnoreCase).
      *
-     * @return {@code true}, if {@code s} is case-insensitively equal to the Java ·{@code null} literal; {@code false},
-     * if not.
+     * @return {@code true}, if {@code predicate} evaluates to {@code true} for the Java null literal;
+     * {@code false}, if not.
      */
-    static boolean isNullLiteral( final String s )
+    static boolean isNullLiteral( final Predicate<? super String> predicate )
     {
-        return NULL_LITERAL.equalsIgnoreCase( s );
+        return predicate.test( NULL_LITERAL );
+    }
+
+    /**
+     * Tests Java keywords, Java boolean literals and the Java {@code null} literal.
+     *
+     * @param predicate The predicate to evaluate (e.g. "Test"::equalsIgnoreCase).
+     *
+     * @return {@code true}, if {@code predicate} evaluates to {@code true} for any Java keyword, Java boolean literal
+     * or the Java {@code null} literal; {@code false}, if not.
+     */
+    static boolean isKeywordOrBooleanOrNullLiteral( final Predicate<? super String> predicate )
+    {
+        return isToken( KEYWORDS_AND_LITERALS, predicate );
+    }
+
+    /**
+     * Tests Java language tokens.
+     *
+     * @param tokens A collection holding the tokens to test with.
+     * @param predicate The predicate to evaluate (e.g. "Test"::equalsIgnoreCase).
+     *
+     * @return {@code true}, if {@code predicate} evaluates to {@code true} for any Java language token from
+     * {@code tokens}; {@code false}, if not.
+     */
+    private static <T extends String> boolean isToken( final Collection<T> tokens,
+                                                       final Predicate<? super String> predicate )
+    {
+        try ( final Stream<T> stream = tokens.parallelStream() )
+        {
+            return stream.anyMatch( predicate );
+        }
     }
 
 }

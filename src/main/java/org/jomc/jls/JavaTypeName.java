@@ -37,6 +37,7 @@ import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.ParsePosition;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -44,7 +45,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.stream.Stream;
 
 /**
  * Data type of a Java type name.
@@ -1625,89 +1630,53 @@ public final class JavaTypeName implements Serializable
 
                 }
 
-                // Check basic type.
                 if ( token == null )
                 {
-                    for ( final String basicType : JavaLanguage.BASIC_TYPES )
+                    final String substring = str.substring( idx );
+                    final BiFunction<Collection<String>, Integer, Token> parse = ( c, k )  ->
                     {
-                        if ( str.substring( idx ).startsWith( basicType ) )
+                        try ( final Stream<String> stream = c.parallelStream() )
                         {
-                            idx += basicType.length();
+                            Token result = null;
 
-                            if ( idx >= str.length()
-                                     || !Character.isJavaIdentifierPart( str.charAt( idx ) ) )
+                            final Optional<String> type = stream.filter( t  ->
                             {
-                                token = new Token( TK_BASIC_TYPE, pos.getIndex(), basicType );
-                                pos.setIndex( idx );
-                                break;
+                                final int i1 = pos.getIndex() + t.length();
+                                return substring.startsWith( t )
+                                           && ( i1 >= str.length()
+                                                || !Character.isJavaIdentifierPart( str.charAt( i1 ) ) );
+
+                            } ).max( ( t1, t2 )  -> t1.length() - t2.length() );
+
+                            if ( type.isPresent() )
+                            {
+                                result = new Token( k, pos.getIndex(), type.get() );
+                                pos.setIndex( pos.getIndex() + type.get().length() );
                             }
 
-                            idx -= basicType.length();
+                            return result;
                         }
-                    }
-                }
+                    };
 
-                // Check keyword.
-                if ( token == null )
-                {
-                    for ( final String keyword : JavaLanguage.KEYWORDS )
+                    // Check basic type.
+                    token = parse.apply( JavaLanguage.BASIC_TYPES, Tokenizer.TK_BASIC_TYPE );
+
+                    if ( token == null )
                     {
-                        if ( str.substring( idx ).startsWith( keyword ) )
-                        {
-                            idx += keyword.length();
-
-                            if ( idx >= str.length()
-                                     || !Character.isJavaIdentifierPart( str.charAt( idx ) ) )
-                            {
-                                token = new Token( TK_KEYWORD, pos.getIndex(), keyword );
-                                pos.setIndex( idx );
-                                break;
-                            }
-
-                            idx -= keyword.length();
-                        }
+                        // Check keyword.
+                        token = parse.apply( JavaLanguage.KEYWORDS, Tokenizer.TK_KEYWORD );
                     }
-                }
 
-                // Check boolean literals.
-                if ( token == null )
-                {
-                    for ( final String literal : JavaLanguage.BOOLEAN_LITERALS )
+                    if ( token == null )
                     {
-                        if ( str.substring( idx ).startsWith( literal ) )
-                        {
-                            idx += literal.length();
-
-                            if ( idx >= str.length()
-                                     || !Character.isJavaIdentifierPart( str.charAt( idx ) ) )
-                            {
-                                token = new Token( TK_LITERAL, pos.getIndex(), literal );
-                                pos.setIndex( idx );
-                                break;
-                            }
-
-                            idx -= literal.length();
-                        }
+                        // Check boolean literal.
+                        token = parse.apply( JavaLanguage.BOOLEAN_LITERALS, Tokenizer.TK_LITERAL );
                     }
-                }
 
-                // Check null literal.
-                if ( token == null )
-                {
-                    if ( str.substring( idx ).startsWith( JavaLanguage.NULL_LITERAL ) )
+                    if ( token == null )
                     {
-                        idx += JavaLanguage.NULL_LITERAL.length();
-
-                        if ( idx >= str.length()
-                                 || !Character.isJavaIdentifierPart( str.charAt( idx ) ) )
-                        {
-                            token = new Token( TK_LITERAL, pos.getIndex(), JavaLanguage.NULL_LITERAL );
-                            pos.setIndex( idx );
-                        }
-                        else
-                        {
-                            idx -= JavaLanguage.NULL_LITERAL.length();
-                        }
+                        // Check null literal.
+                        token = parse.apply( Set.of( JavaLanguage.NULL_LITERAL ), Tokenizer.TK_LITERAL );
                     }
                 }
 

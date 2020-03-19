@@ -30,8 +30,11 @@
  */
 package org.jomc.jls.test;
 
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  * Java language support.
@@ -168,6 +171,66 @@ class JavaLanguage
         KEYWORDS.add( "void" );
         KEYWORDS.add( "volatile" );
         KEYWORDS.add( "while" );
+    }
+
+    @FunctionalInterface
+    interface Testcase<T>
+    {
+
+        void perform( T value ) throws Exception;
+
+    }
+
+    static void forEachKeyword( final Testcase<String> testcase ) throws Exception
+    {
+        forEachToken( KEYWORDS, testcase );
+    }
+
+    static void forEachLiteral( final Testcase<String> testcase ) throws Exception
+    {
+        forEachToken( BOOLEAN_LITERALS, testcase );
+        testcase.perform( NULL_LITERAL );
+    }
+
+    static void forEachPrimitiveType( final Testcase<String> testcase ) throws Exception
+    {
+        forEachToken( BASIC_TYPES, testcase );
+    }
+
+    private static void forEachToken( final Collection<String> tokens,
+                                      final Testcase<String> testcase )
+        throws Exception
+    {
+        try ( final Stream<String> stream = tokens.parallelStream() )
+        {
+            final Optional<Throwable> exception = stream.map( ( token )  ->
+            {
+                Throwable ex = null;
+
+                try
+                {
+                    testcase.perform( token );
+                }
+                catch ( final Throwable e )
+                {
+                    ex = e;
+                }
+
+                return ex;
+            } ).filter( ex  -> ex != null ).findFirst();
+
+            if ( exception.isPresent() )
+            {
+                if ( exception.get() instanceof Error )
+                {
+                    throw (Error) exception.get();
+                }
+                else
+                {
+                    throw (Exception) exception.get();
+                }
+            }
+        }
     }
 
 }

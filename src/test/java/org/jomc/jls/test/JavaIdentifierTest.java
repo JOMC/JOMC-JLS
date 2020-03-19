@@ -34,6 +34,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.text.ParseException;
+import java.util.Objects;
+import java.util.concurrent.Callable;
+import java.util.stream.IntStream;
 import org.jomc.jls.JavaIdentifier;
 import org.junit.Test;
 import static org.jomc.jls.JavaIdentifier.NormalizationMode.CAMEL_CASE;
@@ -71,26 +74,8 @@ public class JavaIdentifierTest
     @Test
     public final void NormalizeThrowsNullPointerExceptionOnNullArgument() throws Exception
     {
-        try
-        {
-            JavaIdentifier.normalize( null, CAMEL_CASE );
-            fail( "Expected 'NullPointerException' not thrown." );
-        }
-        catch ( final NullPointerException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
-        try
-        {
-            JavaIdentifier.normalize( "", null );
-            fail( "Expected 'NullPointerException' not thrown." );
-        }
-        catch ( final NullPointerException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
+        assertNullPointerException( ()  -> JavaIdentifier.normalize( null, CAMEL_CASE ) );
+        assertNullPointerException( ()  -> JavaIdentifier.normalize( "", null ) );
     }
 
     @Test
@@ -99,48 +84,20 @@ public class JavaIdentifierTest
         assertInvalidJavaIdentifier( "" );
         assertInvalidJavaIdentifier( "@" );
         assertInvalidJavaIdentifier( "   " );
-
-        JavaLanguage.KEYWORDS.stream().forEach( ( keyword )  ->
-        {
-            assertInvalidJavaIdentifier( keyword );
-        } );
-
-        JavaLanguage.BOOLEAN_LITERALS.stream().forEach( ( literal )  ->
-        {
-            assertInvalidJavaIdentifier( literal );
-        } );
-
-        assertInvalidJavaIdentifier( JavaLanguage.NULL_LITERAL );
+        JavaLanguage.forEachKeyword( ( keyword )  -> assertInvalidJavaIdentifier( keyword ) );
+        JavaLanguage.forEachLiteral( ( literal )  -> assertInvalidJavaIdentifier( literal ) );
     }
 
     @Test
     public final void ParseThrowsNullPointerExceptionOnNullArgument() throws Exception
     {
-        try
-        {
-            JavaIdentifier.parse( null );
-            fail( "Expected 'NullPointerException' not thrown." );
-        }
-        catch ( final NullPointerException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
+        assertNullPointerException( ()  -> JavaIdentifier.parse( null ) );
     }
 
     @Test
     public final void ValueOfThrowsNullPointerExceptionOnNullArgument() throws Exception
     {
-        try
-        {
-            JavaIdentifier.valueOf( null );
-            fail( "Expected 'NullPointerException' not thrown." );
-        }
-        catch ( final NullPointerException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.toString() );
-        }
+        assertNullPointerException( ()  -> JavaIdentifier.valueOf( null ) );
     }
 
     @Test
@@ -191,22 +148,19 @@ public class JavaIdentifierTest
         assertEquals( JavaIdentifier.valueOf( "TesttesttestTesttesttest" ),
                       JavaIdentifier.normalize( "tEsTtEsTtEsT tEsTtEsTtEsT", CAMEL_CASE ) );
 
-        for ( final String keyword : JavaLanguage.KEYWORDS )
+        JavaLanguage.forEachKeyword( ( keyword )  ->
         {
             assertEquals( JavaIdentifier.valueOf( toUpperCase( keyword, 0, 1 ) ),
                           JavaIdentifier.normalize( "   " + keyword + "   ", CAMEL_CASE ) );
 
-        }
+        } );
 
-        for ( final String literal : JavaLanguage.BOOLEAN_LITERALS )
+        JavaLanguage.forEachLiteral( ( literal )  ->
         {
             assertEquals( JavaIdentifier.valueOf( toUpperCase( literal, 0, 1 ) ),
                           JavaIdentifier.normalize( "   " + literal + "   ", CAMEL_CASE ) );
 
-        }
-
-        assertEquals( JavaIdentifier.valueOf( toUpperCase( JavaLanguage.NULL_LITERAL, 0, 1 ) ),
-                      JavaIdentifier.normalize( "   " + JavaLanguage.NULL_LITERAL + "   ", CAMEL_CASE ) );
+        } );
 
         assertInvalidJavaIdentifier( "", CAMEL_CASE );
         assertInvalidJavaIdentifier( "@", CAMEL_CASE );
@@ -246,22 +200,19 @@ public class JavaIdentifierTest
         assertEquals( JavaIdentifier.valueOf( "TEST_TEST_TEST" ),
                       JavaIdentifier.normalize( "TEST_TEST_TEST", UPPER_CASE ) );
 
-        for ( final String keyword : JavaLanguage.KEYWORDS )
+        JavaLanguage.forEachKeyword( ( keyword )  ->
         {
             assertEquals( JavaIdentifier.valueOf( toUpperCase( keyword ) ),
                           JavaIdentifier.normalize( "   " + keyword + "   ", UPPER_CASE ) );
 
-        }
+        } );
 
-        for ( final String literal : JavaLanguage.BOOLEAN_LITERALS )
+        JavaLanguage.forEachLiteral( ( literal )  ->
         {
             assertEquals( JavaIdentifier.valueOf( toUpperCase( literal ) ),
                           JavaIdentifier.normalize( "   " + literal + "   ", UPPER_CASE ) );
 
-        }
-
-        assertEquals( JavaIdentifier.valueOf( toUpperCase( JavaLanguage.NULL_LITERAL ) ),
-                      JavaIdentifier.normalize( "   " + JavaLanguage.NULL_LITERAL + "   ", UPPER_CASE ) );
+        } );
 
         assertInvalidJavaIdentifier( "", UPPER_CASE );
         assertInvalidJavaIdentifier( "@", UPPER_CASE );
@@ -301,21 +252,18 @@ public class JavaIdentifierTest
         assertEquals( JavaIdentifier.valueOf( "test_test_test" ),
                       JavaIdentifier.normalize( "test_test_test", LOWER_CASE ) );
 
-        for ( final String keyword : JavaLanguage.KEYWORDS )
+        JavaLanguage.forEachKeyword( ( keyword )  ->
         {
             assertEquals( JavaIdentifier.valueOf( "_" + toLowerCase( keyword ) ),
                           JavaIdentifier.normalize( "   " + keyword + "   ", LOWER_CASE ) );
-        }
+        } );
 
-        for ( final String literal : JavaLanguage.BOOLEAN_LITERALS )
+        JavaLanguage.forEachLiteral( ( literal )  ->
         {
             assertEquals( JavaIdentifier.valueOf( "_" + toLowerCase( literal ) ),
                           JavaIdentifier.normalize( "   " + literal + "   ", LOWER_CASE ) );
 
-        }
-
-        assertEquals( JavaIdentifier.valueOf( "_" + toLowerCase( JavaLanguage.NULL_LITERAL ) ),
-                      JavaIdentifier.normalize( "   " + JavaLanguage.NULL_LITERAL + "   ", LOWER_CASE ) );
+        } );
 
         assertInvalidJavaIdentifier( "", LOWER_CASE );
         assertInvalidJavaIdentifier( "@", LOWER_CASE );
@@ -355,22 +303,19 @@ public class JavaIdentifierTest
         assertEquals( JavaIdentifier.valueOf( "TEST_TEST_TEST" ),
                       JavaIdentifier.normalize( "TEST_TEST_TEST", CONSTANT_NAME_CONVENTION ) );
 
-        for ( final String keyword : JavaLanguage.KEYWORDS )
+        JavaLanguage.forEachKeyword( ( keyword )  ->
         {
             assertEquals( JavaIdentifier.valueOf( toUpperCase( keyword ) ),
                           JavaIdentifier.normalize( "   " + keyword + "   ", CONSTANT_NAME_CONVENTION ) );
 
-        }
+        } );
 
-        for ( final String literal : JavaLanguage.BOOLEAN_LITERALS )
+        JavaLanguage.forEachLiteral( ( literal )  ->
         {
             assertEquals( JavaIdentifier.valueOf( toUpperCase( literal ) ),
                           JavaIdentifier.normalize( "   " + literal + "   ", CONSTANT_NAME_CONVENTION ) );
 
-        }
-
-        assertEquals( JavaIdentifier.valueOf( toUpperCase( JavaLanguage.NULL_LITERAL ) ),
-                      JavaIdentifier.normalize( " " + JavaLanguage.NULL_LITERAL + " ", CONSTANT_NAME_CONVENTION ) );
+        } );
 
         assertInvalidJavaIdentifier( "", CONSTANT_NAME_CONVENTION );
         assertInvalidJavaIdentifier( "@", CONSTANT_NAME_CONVENTION );
@@ -425,22 +370,19 @@ public class JavaIdentifierTest
         assertEquals( JavaIdentifier.valueOf( "testtesttestTesttesttest" ),
                       JavaIdentifier.normalize( "TeStTeStTeSt TeStTeStTeSt", METHOD_NAME_CONVENTION ) );
 
-        for ( final String keyword : JavaLanguage.KEYWORDS )
+        JavaLanguage.forEachKeyword( ( keyword )  ->
         {
             assertEquals( JavaIdentifier.valueOf( "_" + keyword ),
                           JavaIdentifier.normalize( "   " + keyword + "   ", METHOD_NAME_CONVENTION ) );
 
-        }
+        } );
 
-        for ( final String literal : JavaLanguage.BOOLEAN_LITERALS )
+        JavaLanguage.forEachLiteral( ( literal )  ->
         {
             assertEquals( JavaIdentifier.valueOf( "_" + literal ),
                           JavaIdentifier.normalize( "   " + literal + "   ", METHOD_NAME_CONVENTION ) );
 
-        }
-
-        assertEquals( JavaIdentifier.valueOf( "_" + JavaLanguage.NULL_LITERAL ),
-                      JavaIdentifier.normalize( "   " + JavaLanguage.NULL_LITERAL + "   ", METHOD_NAME_CONVENTION ) );
+        } );
 
         assertInvalidJavaIdentifier( "", METHOD_NAME_CONVENTION );
         assertInvalidJavaIdentifier( "@", METHOD_NAME_CONVENTION );
@@ -495,22 +437,19 @@ public class JavaIdentifierTest
         assertEquals( JavaIdentifier.valueOf( "testtesttestTesttesttest" ),
                       JavaIdentifier.normalize( "TeStTeStTeSt TeStTeStTeSt", VARIABLE_NAME_CONVENTION ) );
 
-        for ( final String keyword : JavaLanguage.KEYWORDS )
+        JavaLanguage.forEachKeyword( ( keyword )  ->
         {
             assertEquals( JavaIdentifier.valueOf( "_" + keyword ),
                           JavaIdentifier.normalize( "   " + keyword + "   ", VARIABLE_NAME_CONVENTION ) );
 
-        }
+        } );
 
-        for ( final String literal : JavaLanguage.BOOLEAN_LITERALS )
+        JavaLanguage.forEachLiteral( ( literal )  ->
         {
             assertEquals( JavaIdentifier.valueOf( "_" + literal ),
                           JavaIdentifier.normalize( "   " + literal + "   ", VARIABLE_NAME_CONVENTION ) );
 
-        }
-
-        assertEquals( JavaIdentifier.valueOf( "_" + JavaLanguage.NULL_LITERAL ),
-                      JavaIdentifier.normalize( "   " + JavaLanguage.NULL_LITERAL + "   ", VARIABLE_NAME_CONVENTION ) );
+        } );
 
         assertInvalidJavaIdentifier( "", VARIABLE_NAME_CONVENTION );
         assertInvalidJavaIdentifier( "@", VARIABLE_NAME_CONVENTION );
@@ -520,46 +459,21 @@ public class JavaIdentifierTest
     @Test
     public final void Serializable() throws Exception
     {
-        ObjectOutputStream out = null;
-
-        try
+        try ( final ObjectOutputStream out = new ObjectOutputStream( new ByteArrayOutputStream() ) )
         {
-            out = new ObjectOutputStream( new ByteArrayOutputStream() );
             out.writeObject( JavaIdentifier.valueOf( "Java" ) );
-            out.close();
-            out = null;
-        }
-        finally
-        {
-            if ( out != null )
-            {
-                out.close();
-            }
         }
     }
 
     @Test
     public final void Deserializable() throws Exception
     {
-        ObjectInputStream in = null;
-
-        try
+        try ( final ObjectInputStream in = new ObjectInputStream( this.getClass().getResourceAsStream(
+            ABSOLUTE_RESOURCE_NAME_PREFIX + "JavaIdentifier.ser" ) ) )
         {
-            in = new ObjectInputStream( this.getClass().getResourceAsStream(
-                ABSOLUTE_RESOURCE_NAME_PREFIX + "JavaIdentifier.ser" ) );
-
             final JavaIdentifier javaIdentifier = (JavaIdentifier) in.readObject();
             assertEquals( "Java", javaIdentifier.toString() );
             System.out.println( javaIdentifier );
-            in.close();
-            in = null;
-        }
-        finally
-        {
-            if ( in != null )
-            {
-                in.close();
-            }
         }
     }
 
@@ -588,6 +502,20 @@ public class JavaIdentifierTest
         }
     }
 
+    private <T> void assertNullPointerException( final Callable<T> callable ) throws Exception
+    {
+        try
+        {
+            callable.call();
+            fail( "Expected 'NullPointerException' not thrown." );
+        }
+        catch ( final NullPointerException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
+        }
+    }
+
     private static void assertInvalidJavaIdentifier( final String identifier,
                                                      final JavaIdentifier.NormalizationMode mode )
     {
@@ -607,9 +535,9 @@ public class JavaIdentifierTest
     {
         final char[] c = string.toCharArray();
 
-        for ( int i = c.length - 1; i >= 0; i-- )
+        try ( final IntStream stream = IntStream.range( 0, c.length ).parallel().unordered() )
         {
-            c[i] = Character.toUpperCase( c[i] );
+            stream.forEach( ( i )  -> c[i] = Character.toUpperCase( c[i] ) );
         }
 
         return String.valueOf( c );
@@ -619,10 +547,8 @@ public class JavaIdentifierTest
     {
         final int limit = offset + count;
 
-        if ( string == null )
-        {
-            throw new NullPointerException( "string" );
-        }
+        Objects.requireNonNull( string, "string" );
+
         if ( offset < 0 || offset >= string.length() )
         {
             throw new StringIndexOutOfBoundsException();
@@ -634,12 +560,12 @@ public class JavaIdentifierTest
 
         final char[] c = string.toCharArray();
 
-        for ( int i = c.length - 1; i >= 0; i-- )
+        try ( final IntStream stream = IntStream.range( offset, limit ).parallel().unordered() )
         {
-            if ( i >= offset && i < limit )
+            stream.forEach( ( i )  ->
             {
                 c[i] = Character.toUpperCase( c[i] );
-            }
+            } );
         }
 
         return String.valueOf( c );
@@ -649,9 +575,9 @@ public class JavaIdentifierTest
     {
         final char[] c = string.toCharArray();
 
-        for ( int i = c.length - 1; i >= 0; i-- )
+        try ( final IntStream stream = IntStream.range( 0, c.length ).parallel().unordered() )
         {
-            c[i] = Character.toLowerCase( c[i] );
+            stream.forEach( i  -> c[i] = Character.toLowerCase( c[i] ) );
         }
 
         return String.valueOf( c );

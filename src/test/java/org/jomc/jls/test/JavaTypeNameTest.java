@@ -34,6 +34,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.text.ParseException;
+import java.util.concurrent.Callable;
 import org.jomc.jls.JavaTypeName;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
@@ -67,35 +68,16 @@ public class JavaTypeNameTest
     @Test
     public final void ThrowsNullPointerExceptionOnNullArgument() throws Exception
     {
-        try
-        {
-            JavaTypeName.parse( null );
-            fail( "Expected 'NullPointerException' not thrown." );
-        }
-        catch ( final NullPointerException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.getMessage() );
-        }
-
-        try
-        {
-            JavaTypeName.valueOf( null );
-            fail( "Expected 'NullPointerException' not thrown." );
-        }
-        catch ( final NullPointerException e )
-        {
-            assertNotNull( e.getMessage() );
-            System.out.println( e.getMessage() );
-        }
+        assertNullPointerException( ()  -> JavaTypeName.parse( null ) );
+        assertNullPointerException( ()  -> JavaTypeName.valueOf( null ) );
     }
 
     @Test
     public final void ParsesBasicTypeNames() throws Exception
     {
-        JavaLanguage.BASIC_TYPES.forEach( ( basicType )  ->
+        JavaLanguage.forEachPrimitiveType( ( type )  ->
         {
-            assertBasicTypeName( basicType );
+            assertBasicTypeName( type );
         } );
     }
 
@@ -289,7 +271,7 @@ public class JavaTypeNameTest
     @Test
     public final void ParsesBasicArrayTypeNames() throws Exception
     {
-        JavaLanguage.BASIC_TYPES.stream().forEach( ( basicType )  ->
+        JavaLanguage.forEachPrimitiveType( ( basicType )  ->
         {
             assertBasicArrayTypeName( basicType + "[]" );
             assertBasicArrayTypeName( basicType + "[][]" );
@@ -300,7 +282,7 @@ public class JavaTypeNameTest
     @Test
     public final void DetectsInvalidQualifiedBasicTypeNames() throws Exception
     {
-        JavaLanguage.BASIC_TYPES.stream().forEach( ( basicType )  ->
+        JavaLanguage.forEachPrimitiveType( ( basicType )  ->
         {
             assertInvalidTypeName( "validpackagename." + basicType );
         } );
@@ -309,7 +291,7 @@ public class JavaTypeNameTest
     @Test
     public final void DetectsInvalidQualifiedBasicArrayTypeNames() throws Exception
     {
-        JavaLanguage.BASIC_TYPES.stream().forEach( ( basicType )  ->
+        JavaLanguage.forEachPrimitiveType( ( basicType )  ->
         {
             assertInvalidTypeName( "validpackagename." + basicType + "[]" );
             assertInvalidTypeName( "validpackagename." + basicType + "[][]" );
@@ -320,7 +302,7 @@ public class JavaTypeNameTest
     @Test
     public final void DetectsInvalidBasicTypeNamesWithReferenceTypeArgument() throws Exception
     {
-        JavaLanguage.BASIC_TYPES.stream().forEach( ( basicType )  ->
+        JavaLanguage.forEachPrimitiveType( ( basicType )  ->
         {
             assertInvalidTypeName( basicType + "<Test>" );
         } );
@@ -329,7 +311,7 @@ public class JavaTypeNameTest
     @Test
     public final void DetectsInvalidBasicTypeNamesWithWildcardTypeArgument() throws Exception
     {
-        JavaLanguage.BASIC_TYPES.stream().forEach( ( basicType )  ->
+        JavaLanguage.forEachPrimitiveType( ( basicType )  ->
         {
             assertInvalidTypeName( basicType + "<?>" );
         } );
@@ -338,7 +320,7 @@ public class JavaTypeNameTest
     @Test
     public final void DetectsInvalidBasicTypeNamesWithBoundedWildcardTypeArgument() throws Exception
     {
-        JavaLanguage.BASIC_TYPES.stream().forEach( ( basicType )  ->
+        JavaLanguage.forEachPrimitiveType( ( basicType )  ->
         {
             assertInvalidTypeName( basicType + "<? extends Test>" );
             assertInvalidTypeName( basicType + "<? super Test>" );
@@ -348,7 +330,7 @@ public class JavaTypeNameTest
     @Test
     public final void DetectsInvalidKeywordOrBooleanLiteralOrNullLiteralIdentifiers() throws Exception
     {
-        JavaLanguage.KEYWORDS.stream().forEach( ( keyword )  ->
+        JavaLanguage.forEachKeyword( ( keyword )  ->
         {
             if ( !JavaLanguage.BASIC_TYPES.contains( keyword ) )
             {
@@ -367,7 +349,7 @@ public class JavaTypeNameTest
             assertInvalidTypeName( "validpackagename.Test<?, Test, ? super " + keyword + ">" );
         } );
 
-        JavaLanguage.BOOLEAN_LITERALS.stream().forEach( ( literal )  ->
+        JavaLanguage.forEachLiteral( ( literal )  ->
         {
             assertInvalidTypeName( literal );
             assertInvalidTypeName( "validpackagename." + literal );
@@ -381,18 +363,6 @@ public class JavaTypeNameTest
             assertInvalidTypeName( "validpackagename.Test<?, Test, ? extends " + literal + ">" );
             assertInvalidTypeName( "validpackagename.Test<?, Test, ? super " + literal + ">" );
         } );
-
-        assertInvalidTypeName( JavaLanguage.NULL_LITERAL );
-        assertInvalidTypeName( "validpackagename." + JavaLanguage.NULL_LITERAL );
-        assertInvalidTypeName( "validpackagename.Test<" + JavaLanguage.NULL_LITERAL + ">" );
-        assertInvalidTypeName( "validpackagename.Test<Test," + JavaLanguage.NULL_LITERAL + ">" );
-        assertInvalidTypeName( "validpackagename.Test<?,Test," + JavaLanguage.NULL_LITERAL + ">" );
-        assertInvalidTypeName( "validpackagename.Test<? extends " + JavaLanguage.NULL_LITERAL + ">" );
-        assertInvalidTypeName( "validpackagename.Test<? super " + JavaLanguage.NULL_LITERAL + ">" );
-        assertInvalidTypeName( "validpackagename.Test<Test, ? extends " + JavaLanguage.NULL_LITERAL + ">" );
-        assertInvalidTypeName( "validpackagename.Test<Test, ? super " + JavaLanguage.NULL_LITERAL + ">" );
-        assertInvalidTypeName( "validpackagename.Test<?, Test, ? extends " + JavaLanguage.NULL_LITERAL + ">" );
-        assertInvalidTypeName( "validpackagename.Test<?, Test, ? super " + JavaLanguage.NULL_LITERAL + ">" );
     }
 
     @Test
@@ -442,7 +412,7 @@ public class JavaTypeNameTest
         assertInvalidTypeName( "TEST<TEST<." );
         assertInvalidTypeName( "TEST<TEST<?" );
 
-        JavaLanguage.BASIC_TYPES.stream().forEach( ( basicType )  ->
+        JavaLanguage.forEachPrimitiveType( ( basicType )  ->
         {
             assertInvalidTypeName( "[" + basicType );
             assertInvalidTypeName( "]" + basicType );
@@ -483,7 +453,7 @@ public class JavaTypeNameTest
         assertInvalidTypeName( "TEST.TEST<?extends" );
         assertInvalidTypeName( "TEST.TEST<?super" );
 
-        JavaLanguage.BASIC_TYPES.stream().forEach( ( basicType )  ->
+        JavaLanguage.forEachPrimitiveType( ( basicType )  ->
         {
             assertInvalidTypeName( basicType + "[" );
         } );
@@ -494,7 +464,7 @@ public class JavaTypeNameTest
     {
         assertInvalidTypeName( "@" );
 
-        JavaLanguage.BASIC_TYPES.stream().forEach( ( basicType )  ->
+        JavaLanguage.forEachPrimitiveType( ( basicType )  ->
         {
             assertInvalidTypeName( basicType + "@" );
         } );
@@ -516,7 +486,7 @@ public class JavaTypeNameTest
     @Test
     public final void DetectsDuplicateTokens() throws Exception
     {
-        JavaLanguage.BASIC_TYPES.stream().forEach( ( basicType )  ->
+        JavaLanguage.forEachPrimitiveType( ( basicType )  ->
         {
             assertInvalidTypeName( basicType + " " + basicType );
         } );
@@ -588,67 +558,33 @@ public class JavaTypeNameTest
     @Test
     public final void Serializable() throws Exception
     {
-        ObjectOutputStream out = null;
-
-        try
+        try ( final ObjectOutputStream out = new ObjectOutputStream( new ByteArrayOutputStream() ) )
         {
-            out = new ObjectOutputStream( new ByteArrayOutputStream() );
             out.writeObject( JavaTypeName.valueOf( "Java<Java>" ) );
-            out.close();
-            out = null;
-        }
-        finally
-        {
-            if ( out != null )
-            {
-                out.close();
-            }
         }
     }
 
     @Test
     public final void Deserializable() throws Exception
     {
-        ObjectInputStream in = null;
-
-        try
+        try ( final ObjectInputStream in =
+            new ObjectInputStream( this.getClass().getResourceAsStream( ABSOLUTE_RESOURCE_NAME_PREFIX
+                                                                            + "JavaTypeName.ser" ) ) )
         {
-            in = new ObjectInputStream( this.getClass().getResourceAsStream( ABSOLUTE_RESOURCE_NAME_PREFIX
-                                                                                 + "JavaTypeName.ser" ) );
-
             final JavaTypeName javaTypeName = (JavaTypeName) in.readObject();
             assertEquals( "Java<Java>", javaTypeName.getName( true ) );
             assertEquals( 1, javaTypeName.getArguments().size() );
             assertEquals( "Java", javaTypeName.getArguments().get( 0 ).getTypeName().getName( true ) );
             System.out.println( javaTypeName );
-            in.close();
-            in = null;
-        }
-        finally
-        {
-            if ( in != null )
-            {
-                in.close();
-            }
         }
 
-        try
+        try ( final ObjectInputStream in =
+            new ObjectInputStream( this.getClass().getResourceAsStream( ABSOLUTE_RESOURCE_NAME_PREFIX
+                                                                            + "JavaTypeNameArgument.ser" ) ) )
         {
-            in = new ObjectInputStream( this.getClass().getResourceAsStream( ABSOLUTE_RESOURCE_NAME_PREFIX
-                                                                                 + "JavaTypeNameArgument.ser" ) );
-
             final JavaTypeName.Argument javaTypeNameArgument = (JavaTypeName.Argument) in.readObject();
             assertEquals( "Java", javaTypeNameArgument.getTypeName().getName( true ) );
             System.out.println( javaTypeNameArgument );
-            in.close();
-            in = null;
-        }
-        finally
-        {
-            if ( in != null )
-            {
-                in.close();
-            }
         }
     }
 
@@ -684,6 +620,20 @@ public class JavaTypeNameTest
         {
             assertNotNull( e.getMessage() );
             System.out.println( e.getMessage() );
+        }
+    }
+
+    private <T> void assertNullPointerException( final Callable<T> callable ) throws Exception
+    {
+        try
+        {
+            callable.call();
+            fail( "Expected 'NullPointerException' not thrown." );
+        }
+        catch ( final NullPointerException e )
+        {
+            assertNotNull( e.getMessage() );
+            System.out.println( e.toString() );
         }
     }
 
