@@ -201,7 +201,7 @@ class JavaLanguage
                                       final Testcase<String> testcase )
         throws Exception
     {
-        try ( final Stream<String> stream = tokens.parallelStream() )
+        try ( final Stream<String> stream = tokens.parallelStream().unordered() )
         {
             final Optional<Throwable> exception = stream.map( ( token )  ->
             {

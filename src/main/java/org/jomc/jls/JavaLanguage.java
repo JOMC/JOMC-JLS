@@ -242,7 +242,7 @@ class JavaLanguage
     private static <T extends String> boolean isToken( final Collection<T> tokens,
                                                        final Predicate<? super String> predicate )
     {
-        try ( final Stream<T> stream = tokens.parallelStream() )
+        try ( final Stream<T> stream = tokens.parallelStream().unordered() )
         {
             return stream.anyMatch( predicate );
         }

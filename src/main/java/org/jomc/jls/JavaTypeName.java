@@ -1635,7 +1635,7 @@ public final class JavaTypeName implements Serializable
                     final String substring = str.substring( idx );
                     final BiFunction<Collection<String>, Integer, Token> parse = ( c, k )  ->
                     {
-                        try ( final Stream<String> stream = c.parallelStream() )
+                        try ( final Stream<String> stream = c.parallelStream().unordered() )
                         {
                             Token result = null;
 

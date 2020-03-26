@@ -523,7 +523,7 @@ public final class JavaIdentifier implements CharSequence, Serializable
     {
         final char[] chars = string.toCharArray();
 
-        try ( final Stream<Integer> stream = indices.parallelStream() )
+        try ( final Stream<Integer> stream = indices.parallelStream().unordered() )
         {
             stream.forEach( i  -> chars[i] = Character.toLowerCase( chars[i] ) );
         }
