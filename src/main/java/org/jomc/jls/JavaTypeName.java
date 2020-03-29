@@ -121,7 +121,7 @@ public final class JavaTypeName implements Serializable
         /**
          * Gets the wildcard bounds of the argument.
          *
-         * @return The wildcard bounds of the argument, or {@code null}, if {@link #isWildcard()} returns {@code false}.
+         * @return The wildcard bounds of the argument or {@code null}, if {@link #isWildcard()} returns {@code false}.
          */
         public String getWildcardBounds()
         {
