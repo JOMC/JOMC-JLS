@@ -131,7 +131,7 @@ public final class JavaTypeName implements Serializable
          */
         public Optional<String> getWildcardBounds()
         {
-            return Optional.of( this.wildcardBounds );
+            return Optional.ofNullable( this.wildcardBounds );
         }
 
         /**
@@ -141,7 +141,7 @@ public final class JavaTypeName implements Serializable
          */
         public Optional<JavaTypeName> getTypeName()
         {
-            return Optional.of( this.typeName );
+            return Optional.ofNullable( this.typeName );
         }
 
         /**
