@@ -121,7 +121,7 @@ public final class JavaTypeName implements Serializable
         /**
          * Gets the wildcard bounds of the argument.
          *
-         * @return The wildcard bounds of the argument or {@code null}.
+         * @return The wildcard bounds of the argument, or {@code null}, if {@link #isWildcard()} returns {@code false}.
          */
         public String getWildcardBounds()
         {
@@ -131,7 +131,7 @@ public final class JavaTypeName implements Serializable
         /**
          * Gets the type name of the argument.
          *
-         * @return The type name of the argument or {@code null}, if the argument is a wildcard argument.
+         * @return The type name of the argument or {@code null}, if {@link #isWildcard()} returns {@code true}.
          */
         public JavaTypeName getTypeName()
         {
@@ -150,20 +150,18 @@ public final class JavaTypeName implements Serializable
             {
                 final StringBuilder builder = new StringBuilder( 128 );
 
-                if ( this.isWildcard() )
+                if ( this.wildcard )
                 {
                     builder.append( "?" );
 
-                    if ( this.getWildcardBounds() != null && this.getTypeName() != null )
+                    if ( this.wildcardBounds != null && this.typeName != null )
                     {
-                        builder.append( " " ).append( this.getWildcardBounds() ).append( " " ).
-                            append( this.getTypeName() );
-
+                        builder.append( " " ).append( this.wildcardBounds ).append( " " ).append( this.typeName );
                     }
                 }
                 else
                 {
-                    builder.append( this.getTypeName() );
+                    builder.append( this.typeName );
                 }
 
                 this.cachedString = builder.toString();
@@ -1335,7 +1333,7 @@ public final class JavaTypeName implements Serializable
                     }
                     tokenizer.back();
                     argument.typeName = new JavaTypeName();
-                    parseReferenceType( tokenizer, argument.getTypeName(), true, runtimeException );
+                    parseReferenceType( tokenizer, argument.typeName, true, runtimeException );
                     return;
 
                 case Tokenizer.TK_QM:
