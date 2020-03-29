@@ -574,7 +574,7 @@ public class JavaTypeNameTest
             final JavaTypeName javaTypeName = (JavaTypeName) in.readObject();
             assertEquals( "Java<Java>", javaTypeName.getName( true ) );
             assertEquals( 1, javaTypeName.getArguments().size() );
-            assertEquals( "Java", javaTypeName.getArguments().get( 0 ).getTypeName().getName( true ) );
+            assertEquals( "Java", javaTypeName.getArguments().get( 0 ).getTypeName().get().getName( true ) );
             System.out.println( javaTypeName );
         }
 
@@ -583,7 +583,7 @@ public class JavaTypeNameTest
                                                                             + "JavaTypeNameArgument.ser" ) ) )
         {
             final JavaTypeName.Argument javaTypeNameArgument = (JavaTypeName.Argument) in.readObject();
-            assertEquals( "Java", javaTypeNameArgument.getTypeName().getName( true ) );
+            assertEquals( "Java", javaTypeNameArgument.getTypeName().get().getName( true ) );
             System.out.println( javaTypeNameArgument );
         }
     }
